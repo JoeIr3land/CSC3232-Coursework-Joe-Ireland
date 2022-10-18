@@ -7,22 +7,38 @@ public class PlayerChar : MonoBehaviour
 {
     [SerializeField]
     private float groundSpeed;
-    private Rigidbody body;
-    private Vector2 moveInput;
 
-    private Vector3 lookDirection;
+    private Vector2 moveInput;
+    private Rigidbody body;
+
+    void Start()
+    {
+        body = GetComponent<Rigidbody>();
+    }
 
     void FixedUpdate()
     {
-        Move();
+        Vector3 velocity = body.velocity;
+        velocity.x = moveInput.x * groundSpeed;
+        velocity.z = moveInput.y * groundSpeed;
+        body.velocity = velocity;
     }
 
-    void OnMove(InputValue value)
+    void OnMove(InputValue value) //TODO: Figure out why OnMove stops being called when the input stays the same
     {
+        Rigidbody body = GetComponent<Rigidbody>();
         moveInput = value.Get<Vector2>();
-        lookDirection.x = moveInput.x; //TODO: Figure out how this is updating with 0 input
-        lookDirection.z = moveInput.y;
 
+        if(moveInput.x != 0.0f && moveInput.y != 0.0f)
+        {
+            Vector3 lookDirection = new Vector3(moveInput.x, 0.0f, moveInput.y);
+            transform.rotation = Quaternion.LookRotation(lookDirection);
+            GetComponent<Animator>().SetBool("isRunning", true);
+        }
+        else
+        {
+            GetComponent<Animator>().SetBool("isRunning", false);
+        }
     }
 
     bool OnJump()
@@ -33,7 +49,7 @@ public class PlayerChar : MonoBehaviour
 
     void OnLightAttack()
     {
-        if (OnJump()) { Debug.Log("Down-Light"); }
+        if (OnJump()) { Debug.Log("Up-Light"); }
         Debug.Log("Neutral Light!");
     }
 
@@ -58,20 +74,6 @@ public class PlayerChar : MonoBehaviour
     void OnCrouch()
     {
         Debug.Log("Crouch!");
-    }
-
-    private void Move()
-    {
-
-        body = GetComponent<Rigidbody>();
-        Vector3 velocity = body.velocity;
-
-        velocity.x = moveInput.x * groundSpeed;
-        velocity.z = moveInput.y * groundSpeed;
-
-        transform.rotation = Quaternion.LookRotation(lookDirection);
-
-        body.velocity = velocity;
     }
 
 }

@@ -8,20 +8,55 @@ public class PlayerChar : MonoBehaviour
     [SerializeField]
     private float groundSpeed;
 
+    enum playerState
+    {
+        idle, running, crouching
+    }
+    [SerializeField]
+    playerState currentState;
+
     private Vector2 moveInput;
     private Rigidbody body;
 
     void Start()
     {
         body = GetComponent<Rigidbody>();
+        setCurrentState(playerState.idle);
     }
 
     void FixedUpdate()
     {
-        Vector3 velocity = body.velocity;
-        velocity.x = moveInput.x * groundSpeed;
-        velocity.z = moveInput.y * groundSpeed;
-        body.velocity = velocity;
+        switch (currentState) {
+            case playerState.idle:
+                //Change animation
+                GetComponent<Animator>().SetBool("isRunning", false);
+                GetComponent<Animator>().SetBool("isCrouching", false);
+                break;
+            case playerState.running:
+                //Change animation
+                GetComponent<Animator>().SetBool("isRunning", true);
+
+                //Change player orientation
+                Vector3 lookDirection = new Vector3(moveInput.x, 0.0f, moveInput.y);
+                transform.rotation = Quaternion.LookRotation(lookDirection);
+
+                //Move player
+                Vector3 velocity = body.velocity;
+                velocity.x = moveInput.x * groundSpeed;
+                velocity.z = moveInput.y * groundSpeed;
+                body.velocity = velocity;
+                break;
+            case playerState.crouching:
+                //Change animation
+                GetComponent<Animator>().SetBool("isRunning", false);
+                GetComponent<Animator>().SetBool("isCrouching", true);
+                break;
+        }
+    }
+
+    void setCurrentState(playerState state)
+    {
+        currentState = state;
     }
 
     void OnMove(InputValue value) //TODO: Figure out why OnMove stops being called when the input stays the same
@@ -29,28 +64,32 @@ public class PlayerChar : MonoBehaviour
         Rigidbody body = GetComponent<Rigidbody>();
         moveInput = value.Get<Vector2>();
 
-        if(moveInput.x != 0.0f && moveInput.y != 0.0f)
+        if((moveInput.x != 0.0f && moveInput.y != 0.0f) && (currentState == playerState.idle || currentState == playerState.running))
         {
-            Vector3 lookDirection = new Vector3(moveInput.x, 0.0f, moveInput.y);
-            transform.rotation = Quaternion.LookRotation(lookDirection);
-            GetComponent<Animator>().SetBool("isRunning", true);
+            setCurrentState(playerState.running);
         }
         else
         {
-            GetComponent<Animator>().SetBool("isRunning", false);
+            if (currentState == playerState.running) { setCurrentState(playerState.idle); }
         }
     }
 
-    bool OnJump()
+    void OnCrouch()
+    {
+        Debug.Log("Crouch!");
+        setCurrentState(playerState.crouching);
+
+    }
+
+    void OnJump()
     {
         Debug.Log("Jump!");
-        return true;
+        Rigidbody body = GetComponent<Rigidbody>();
     }
 
     void OnLightAttack()
     {
-        if (OnJump()) { Debug.Log("Up-Light"); }
-        Debug.Log("Neutral Light!");
+        Debug.Log("Neutral Light Attack!");
     }
 
     void OnStrongAttack()
@@ -71,9 +110,5 @@ public class PlayerChar : MonoBehaviour
         Debug.Log("Shield!");
     }
 
-    void OnCrouch()
-    {
-        Debug.Log("Crouch!");
-    }
 
 }

@@ -31,6 +31,8 @@ public class PlayerChar : MonoBehaviour
                 //Change animation
                 GetComponent<Animator>().SetBool("isRunning", false);
                 GetComponent<Animator>().SetBool("isCrouching", false);
+
+                body.velocity = Vector3.zero;
                 break;
             case playerState.running:
                 //Change animation
@@ -50,6 +52,7 @@ public class PlayerChar : MonoBehaviour
                 //Change animation
                 GetComponent<Animator>().SetBool("isRunning", false);
                 GetComponent<Animator>().SetBool("isCrouching", true);
+                body.velocity = Vector3.zero;
                 break;
         }
     }
@@ -64,7 +67,7 @@ public class PlayerChar : MonoBehaviour
         Rigidbody body = GetComponent<Rigidbody>();
         moveInput = value.Get<Vector2>();
 
-        if((moveInput.x != 0.0f && moveInput.y != 0.0f) && (currentState == playerState.idle || currentState == playerState.running))
+        if((moveInput.x != 0.0f || moveInput.y != 0.0f) && (currentState == playerState.idle || currentState == playerState.running))
         {
             setCurrentState(playerState.running);
         }
@@ -76,8 +79,9 @@ public class PlayerChar : MonoBehaviour
 
     void OnCrouch()
     {
-        Debug.Log("Crouch!");
-        setCurrentState(playerState.crouching);
+
+            Debug.Log("Crouch!");
+            setCurrentState(playerState.crouching);
 
     }
 

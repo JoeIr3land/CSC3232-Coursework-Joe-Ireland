@@ -2306,7 +2306,87 @@ MonoBehaviour:
   m_ControlsChangedEvent:
     m_PersistentCalls:
       m_Calls: []
-  m_ActionEvents: []
+  m_ActionEvents:
+  - m_PersistentCalls:
+      m_Calls:
+      - m_Target: {fileID: 8060795485566930116}
+        m_TargetAssemblyTypeName: UnityEngine.GameObject, UnityEngine
+        m_MethodName: SetActive
+        m_Mode: 6
+        m_Arguments:
+          m_ObjectArgument: {fileID: 0}
+          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
+          m_IntArgument: 0
+          m_FloatArgument: 0
+          m_StringArgument: 
+          m_BoolArgument: 0
+        m_CallState: 2
+    m_ActionId: 03a0729f-28e9-4b32-bda9-971e54820f90
+    m_ActionName: Player/Move[/Keyboard/w,/Keyboard/s,/Keyboard/a,/Keyboard/d]
+  - m_PersistentCalls:
+      m_Calls: []
+    m_ActionId: 017a2579-b8da-484e-bbee-9c1d4d4c44f7
+    m_ActionName: Player/Jump[/Keyboard/space]
+  - m_PersistentCalls:
+      m_Calls: []
+    m_ActionId: 0094280a-6568-4c1f-9e2d-6a1af4dfb44c
+    m_ActionName: Player/LightAttack
+  - m_PersistentCalls:
+      m_Calls: []
+    m_ActionId: 384fd8bb-bee0-4381-88ea-ee83165f8cd0
+    m_ActionName: Player/StrongAttack
+  - m_PersistentCalls:
+      m_Calls: []
+    m_ActionId: b3011d5f-ed42-44b1-bff4-79d452b114b2
+    m_ActionName: Player/SpecialAttack
+  - m_PersistentCalls:
+      m_Calls: []
+    m_ActionId: 9c4b8c9b-e7ea-465a-9586-48f0c641afbb
+    m_ActionName: Player/Shield
+  - m_PersistentCalls:
+      m_Calls: []
+    m_ActionId: e13a3ce8-339c-44ce-aa72-660b56b56a7f
+    m_ActionName: Player/Crouch[/Keyboard/leftShift]
+  - m_PersistentCalls:
+      m_Calls: []
+    m_ActionId: a004ff94-1297-4e24-b5e9-c8f960780323
+    m_ActionName: UI/Navigate[/Keyboard/w,/Keyboard/upArrow,/Keyboard/s,/Keyboard/downArrow,/Keyboard/a,/Keyboard/leftArrow,/Keyboard/d,/Keyboard/rightArrow]
+  - m_PersistentCalls:
+      m_Calls: []
+    m_ActionId: d0b4a995-7834-4a9f-82cb-422b441d2a27
+    m_ActionName: UI/Submit[/Keyboard/enter]
+  - m_PersistentCalls:
+      m_Calls: []
+    m_ActionId: ee296399-ed5b-4564-a9eb-037806c74b2b
+    m_ActionName: UI/Cancel[/Keyboard/escape]
+  - m_PersistentCalls:
+      m_Calls: []
+    m_ActionId: 25762f8b-3ffd-4490-8438-c75facee2d08
+    m_ActionName: UI/Point
+  - m_PersistentCalls:
+      m_Calls: []
+    m_ActionId: 1f74ddad-4e5c-4fcb-ac62-d70ce1bbc9c3
+    m_ActionName: UI/Click
+  - m_PersistentCalls:
+      m_Calls: []
+    m_ActionId: 87d36c6b-8f5a-4b9c-b7b8-3279cf4d8f64
+    m_ActionName: UI/ScrollWheel
+  - m_PersistentCalls:
+      m_Calls: []
+    m_ActionId: 0f0943ac-9940-4f44-8bfc-37ed5a37cdf7
+    m_ActionName: UI/MiddleClick
+  - m_PersistentCalls:
+      m_Calls: []
+    m_ActionId: 5c5ea317-0bf9-4961-a1cf-64bac1395131
+    m_ActionName: UI/RightClick
+  - m_PersistentCalls:
+      m_Calls: []
+    m_ActionId: 2661841a-0c8e-4ae9-a655-1be984e55cc7
+    m_ActionName: UI/TrackedDevicePosition
+  - m_PersistentCalls:
+      m_Calls: []
+    m_ActionId: 4c638ef4-d758-44e4-8f1d-fbcaf956c93b
+    m_ActionName: UI/TrackedDeviceOrientation
   m_NeverAutoSwitchControlSchemes: 0
   m_DefaultControlScheme: 
   m_DefaultActionMap: Player
@@ -2325,6 +2405,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   groundSpeed: 6
+  currentState: 0
 --- !u!1 &8181257524644955768
 GameObject:
   m_ObjectHideFlags: 0

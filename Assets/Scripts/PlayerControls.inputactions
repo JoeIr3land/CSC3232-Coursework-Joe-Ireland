@@ -15,6 +15,15 @@
                     "initialStateCheck": true
                 },
                 {
+                    "name": "Crouch",
+                    "type": "Button",
+                    "id": "e13a3ce8-339c-44ce-aa72-660b56b56a7f",
+                    "expectedControlType": "Button",
+                    "processors": "",
+                    "interactions": "",
+                    "initialStateCheck": false
+                },
+                {
                     "name": "Jump",
                     "type": "Button",
                     "id": "017a2579-b8da-484e-bbee-9c1d4d4c44f7",
@@ -54,15 +63,6 @@
                     "name": "Shield",
                     "type": "Button",
                     "id": "9c4b8c9b-e7ea-465a-9586-48f0c641afbb",
-                    "expectedControlType": "Button",
-                    "processors": "",
-                    "interactions": "",
-                    "initialStateCheck": false
-                },
-                {
-                    "name": "Crouch",
-                    "type": "Button",
-                    "id": "e13a3ce8-339c-44ce-aa72-660b56b56a7f",
                     "expectedControlType": "Button",
                     "processors": "",
                     "interactions": "",

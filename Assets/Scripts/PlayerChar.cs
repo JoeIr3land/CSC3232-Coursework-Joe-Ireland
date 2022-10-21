@@ -6,8 +6,41 @@ using UnityEngine.InputSystem;
 public class PlayerChar : MonoBehaviour
 {
 
-    //TODO: It may be easier to maintain this code if I split controls behaviour between multiple scripts because it is already very long
+    /*
+     * 
+     * 
+     * 
+     * 
+     * 
+     * 
+     * 
+     * 
+     * 
+     * 
+     * 
+     * 
+     * 
+     * 
+     * 
+     * 
+     * 
+     * 
+     * 
+     * 
+     * 
+     * 
+     * 
+     * TODO: move crouch to its own script
+     * 
+     * 
+     * 
+     * 
+     * 
+     * 
+     * 
+     */
     
+
     //Character Stats
     [SerializeField]
     public float groundSpeed;

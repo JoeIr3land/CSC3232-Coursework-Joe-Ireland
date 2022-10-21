@@ -5,114 +5,158 @@ using UnityEngine.InputSystem;
 
 public class PlayerChar : MonoBehaviour
 {
+    
+    //Character Stats
     [SerializeField]
     private float groundSpeed;
 
-    enum playerState
-    {
-        idle, running, crouching
-    }
+    //Player State
+    enum playerState { grounded_idle, running, crouching }
     [SerializeField]
     playerState currentState;
 
-    private Vector2 moveInput;
-    private Rigidbody body;
+    //Components
+    Rigidbody body;
+    Animator animator;
 
-    void Start()
+
+    public void Start()
     {
+
+        //Get components
         body = GetComponent<Rigidbody>();
-        setCurrentState(playerState.idle);
+        animator = GetComponent<Animator>();
+
+        setCurrentState(playerState.grounded_idle);
+
     }
 
-    void FixedUpdate()
-    {
-        switch (currentState) {
-            case playerState.idle:
-                //Change animation
-                GetComponent<Animator>().SetBool("isRunning", false);
-                GetComponent<Animator>().SetBool("isCrouching", false);
-
-                body.velocity = Vector3.zero;
-                break;
-            case playerState.running:
-                //Change animation
-                GetComponent<Animator>().SetBool("isRunning", true);
-
-                //Change player orientation
-                Vector3 lookDirection = new Vector3(moveInput.x, 0.0f, moveInput.y);
-                transform.rotation = Quaternion.LookRotation(lookDirection);
-
-                //Move player
-                Vector3 velocity = body.velocity;
-                velocity.x = moveInput.x * groundSpeed;
-                velocity.z = moveInput.y * groundSpeed;
-                body.velocity = velocity;
-                break;
-            case playerState.crouching:
-                //Change animation
-                GetComponent<Animator>().SetBool("isRunning", false);
-                GetComponent<Animator>().SetBool("isCrouching", true);
-                body.velocity = Vector3.zero;
-                break;
-        }
-    }
-
+    // Change player state
     void setCurrentState(playerState state)
     {
         currentState = state;
     }
 
-    void OnMove(InputValue value) //TODO: Figure out why OnMove stops being called when the input stays the same
-    {
-        Rigidbody body = GetComponent<Rigidbody>();
-        moveInput = value.Get<Vector2>();
 
-        if((moveInput.x != 0.0f || moveInput.y != 0.0f) && (currentState == playerState.idle || currentState == playerState.running))
+    //Called when movement input is registered
+    public void MoveInput(InputAction.CallbackContext context)
+    {
+
+        //Change player state and animation
+        switch (context.phase)
         {
-            setCurrentState(playerState.running);
+
+            //When movement starts, change player state and animation accordingly
+            case InputActionPhase.Started:
+                setCurrentState(playerState.running);
+                animator.SetTrigger("StartRunning");
+                break;
+                /*TODO: change animation/state according to player's existing state, and magnitude of player input
+                 * 
+                 * idle_grounded: 
+                 *      soft input: walk
+                 *      hard input: sprint
+                 * idle_air - aerial drift
+                 * crouching - crawl
+                 * jumpsquat - store input for jump direction and aerial move direction
+                 * hitlag - smash DI & store input for trajectory DI
+                 * knockback - drift DI
+                 * within a few frames of/simultaneously with inputting an attack: up attack
+                 * 
+                 * Maybe an idea is to report a class-scale input direction for use with DI, aerial drift, attack inputs, inputs 
+                 * at ledge etc.
+                 * 
+                 */
+
+            //While movement is held, move player in the corresponding way
+            case InputActionPhase.Performed:
+
+                switch (currentState)
+                {
+                    // If player is running, continue running
+                    case playerState.running:
+                        Run(context.ReadValue<Vector2>());
+                        break;
+                }
+                break;
+                /*TODO: run behaviour for sprint, sprint->run, walk, walk->run, run->walk, aerial drift, crawling,
+                 * updating stored position for jump/aerial move/TDI, drift DI.
+                 * 
+                 * May need to add behaviour for other transitions, depending on if something happens to the player
+                 * but they don't change their input (input would now apply to new context)
+                 */
+
+            case InputActionPhase.Canceled:
+
+                // Cancel movement input depending on player state
+                switch (currentState)
+                {
+                    //If player is running when they let go of stick, they transition to idle pose
+                    case playerState.running:
+                        setCurrentState(playerState.grounded_idle);
+                        animator.SetTrigger("StandStill");
+                        break;
+                }
+                break;
+                /*TODO: change player state/animation depending on action and context
+                 * 
+                 * Structure is made, just add contexts/player states as they are created
+                 * 
+                 */
         }
-        else
+
+    }
+
+    
+    //Called when player is in 'running' state
+    void Run(Vector2 moveDir)
+    {
+        //Change player orientation
+        Vector3 lookDirection = new Vector3(moveDir.x, 0.0f, moveDir.y);
+        transform.rotation = Quaternion.LookRotation(lookDirection);
+
+        //Move player
+        Vector3 velocity = body.velocity;
+        velocity.x = moveDir.x * groundSpeed;
+        velocity.z = moveDir.y * groundSpeed;
+        body.velocity = velocity;
+    }
+
+
+    //Called when crouch is inputted
+    public void CrouchInput(InputAction.CallbackContext context)
+    {
+        switch (context.phase)
         {
-            if (currentState == playerState.running) { setCurrentState(playerState.idle); }
+            case InputActionPhase.Started:
+                setCurrentState(playerState.crouching);
+                animator.SetTrigger("StartCrouching");
+                break;
+                /*TODO - different actions depending on context of input
+                 * 
+                 * idle_grounded, walking or running: crouch
+                 * sprinting, jumpsquat or deep into an attack: ignore input initially but store for TDI
+                 * within a few frames of/simultaneously with inputting an attack: down attack
+                 * idle_air: fastfall
+                 * hitlag: store for downwards TDI
+                 * knockback: downwards drift DI
+                 * 
+                 * ALSO: behaviour while holding crouch, but not started (maybe TDI and drift DI go here?)
+                 * 
+                 */
+
+            case InputActionPhase.Canceled:
+
+                //Cancel crouch input depending on player state
+                switch (currentState)
+                {
+                    //If player was crouching, transition to idle pose
+                    case playerState.crouching:
+                        setCurrentState(playerState.grounded_idle);
+                        animator.SetTrigger("StandStill");
+                        break;
+                }
+                break;
         }
     }
-
-    void OnCrouch()
-    {
-
-            Debug.Log("Crouch!");
-            setCurrentState(playerState.crouching);
-
-    }
-
-    void OnJump()
-    {
-        Debug.Log("Jump!");
-        Rigidbody body = GetComponent<Rigidbody>();
-    }
-
-    void OnLightAttack()
-    {
-        Debug.Log("Neutral Light Attack!");
-    }
-
-    void OnStrongAttack()
-    {
-        if(moveInput.x == 0 && moveInput.y ==0)
-        {
-            Debug.Log("Neutral Strong!");
-        }
-    }
-
-    void OnSpecialAttack()
-    {
-        Debug.Log("Neutral Special!");
-    }
-
-    void OnShield()
-    {
-        Debug.Log("Shield!");
-    }
-
-
 }

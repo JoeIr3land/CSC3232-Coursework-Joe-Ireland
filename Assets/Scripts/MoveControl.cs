@@ -7,17 +7,17 @@ public class MoveControl : MonoBehaviour
 {
 
     //Components
-    //Access player state and stats  from PlayerChar component
+    //Access player state and stats from PlayerChar component
     PlayerChar player;
     Rigidbody body;
     Animator animator;
 
     //Controls state
-    bool MoveInput_Held;
-    Vector2 MoveInput_Value;
+    public bool MoveInput_Held;
+    public Vector2 MoveInput_Value;
 
 
-    void Start()
+    void OnEnable()
     {
         player = GetComponent<PlayerChar>();
         body = GetComponent<Rigidbody>();
@@ -32,6 +32,9 @@ public class MoveControl : MonoBehaviour
         //Movement
         if (MoveInput_Held)
         {
+            //Ensure contradicting animation triggers are disabled
+            animator.ResetTrigger("StandStill");
+
             //Move player according to the player's state
             switch (player.currentState)
             {
@@ -39,9 +42,17 @@ public class MoveControl : MonoBehaviour
                 case PlayerChar.playerState.running:
                     Run(MoveInput_Value);
                     break;
-                // Otherwise, player cannot move
-                default:
+                // If player holds a movement direction and becomes actionable, start running
+                case PlayerChar.playerState.grounded_idle:
+                    player.setCurrentState(PlayerChar.playerState.running);
+                    animator.SetTrigger("StartRunning");
                     break;
+                // If player is in the air, change trajectory according to input
+                case PlayerChar.playerState.airborne:
+                // Add cases for attacking states here - allow aerial drift
+                    AerialDrift(MoveInput_Value);
+                    break;
+                // TODO: movement when hit
             }
             /*TODO: run behaviour for sprint, sprint->run, walk, walk->run, run->walk, aerial drift, crawling,
             * updating stored position for jump/aerial move/TDI, drift DI.
@@ -56,16 +67,26 @@ public class MoveControl : MonoBehaviour
     //Called when movement input is registered
     public void MoveInput(InputAction.CallbackContext context)
     {
+
         //Change player state and animation
         switch (context.phase)
         {
 
             //When movement starts, change player state, control state and animation accordingly
             case InputActionPhase.Started:
-                player.setCurrentState(PlayerChar.playerState.running);
+
                 MoveInput_Held = true;
-                animator.SetTrigger("StartRunning");
+
+                switch (player.currentState)
+                {
+                    case PlayerChar.playerState.grounded_idle:
+                    case PlayerChar.playerState.crouching:
+                        player.setCurrentState(PlayerChar.playerState.running);
+                        animator.SetTrigger("StartRunning");
+                        break;   
+                }
                 break;
+
             /*TODO: change animation/state according to player's existing state, and magnitude of player input
              * 
              * idle_grounded: 
@@ -97,8 +118,10 @@ public class MoveControl : MonoBehaviour
                 {
                     //If player was running, transition to idle pose
                     case PlayerChar.playerState.running:
+                    case PlayerChar.playerState.grounded_idle:
                         player.setCurrentState(PlayerChar.playerState.grounded_idle);
                         animator.SetTrigger("StandStill");
+                        body.velocity = Vector3.zero;
                         break;
                 }
                 break;
@@ -124,6 +147,26 @@ public class MoveControl : MonoBehaviour
         velocity.x = moveDir.x * player.groundSpeed;
         velocity.z = moveDir.y * player.groundSpeed;
         body.velocity = velocity;
+    }
+
+    //Called when player moves in the air
+
+    void AerialDrift(Vector2 moveDir)
+    {
+        //Change player orientation
+        Vector3 lookDirection = new Vector3(moveDir.x, 0.0f, moveDir.y);
+        transform.rotation = Quaternion.LookRotation(lookDirection);
+
+        //Accelerate until character reaches max air speed
+        body.AddForce(moveDir.x * player.airAcceleration, 0, moveDir.y * player.airAcceleration);
+        Vector2 horizontalVelocity = new Vector2(body.velocity.x, body.velocity.z);
+        
+        if(horizontalVelocity.magnitude >= player.maxAirSpeed)
+        {
+            Vector3 newVelocity = body.velocity.normalized * player.maxAirSpeed;
+            newVelocity.y = body.velocity.y; //Preserve vertical velocity
+            body.velocity = newVelocity;
+        }
     }
 
 

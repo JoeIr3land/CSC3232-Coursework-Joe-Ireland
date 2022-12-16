@@ -6,128 +6,119 @@ using UnityEngine.InputSystem;
 public class PlayerChar : MonoBehaviour
 {
 
-    /*
-     * 
-     * 
-     * 
-     * 
-     * 
-     * 
-     * 
-     * 
-     * 
-     * 
-     * 
-     * 
-     * 
-     * 
-     * 
-     * 
-     * 
-     * 
-     * 
-     * 
-     * 
-     * 
-     * 
-     * TODO: move crouch to its own script
-     * 
-     * 
-     * 
-     * 
-     * 
-     * 
-     * 
-     */
-    
-
-    //Character Stats
+    //Character Properties
     [SerializeField]
     public float groundSpeed;
-
-    //Player State
-    public enum playerState { grounded_idle, running, crouching }
     [SerializeField]
-    public playerState currentState;
+    public float airAcceleration;
+    [SerializeField]
+    public float maxAirSpeed;
+    [SerializeField]
+    public float jumpStrengthMin;
+    [SerializeField]
+    public float jumpStrengthMax;
+    [SerializeField]
+    public float midairJumpStrength;
+    [SerializeField]
+    public int maxNumMidairJumps;
+    [SerializeField]
+    public float fallAcceleration;
+    [SerializeField]
+    public float fastFallAcceleration;
 
-    //Controls state - is a button being held?
-
-    bool CrouchInput_Held;
+    //Character Stats
+    private bool isGrounded;
+    private float distToGround;
+    private int jumpsRemaining;
 
     //Components
     Rigidbody body;
     Animator animator;
+    VariableGravity gravity;
+
+    //Player State
+    public enum playerState { grounded_idle, running, crouching, airborne }
+    [SerializeField]
+    public playerState currentState;
+    private List<playerState> groundedStates;
 
 
-    void Start()
+    void OnEnable()
     {
-
-        //Get components
-        body = GetComponent<Rigidbody>();
-        animator = GetComponent<Animator>();
 
         //Set initial player state
         setCurrentState(playerState.grounded_idle);
+        jumpsRemaining = maxNumMidairJumps;
 
-        //Set initial controls state
-        CrouchInput_Held = false;
+        //Get components
+        body = GetComponent<Rigidbody>();
+        gravity = GetComponent<VariableGravity>();
+        gravity.SetGravity(fallAcceleration);
+        animator = GetComponent<Animator>();
 
+        //Setup for checking if grounded
+        distToGround = GetComponent<Collider>().bounds.extents.y;
+        isGrounded = CheckIfGrounded();
+        groundedStates = new List<playerState>();
+        groundedStates.Add(playerState.grounded_idle);
+        groundedStates.Add(playerState.running);
+        groundedStates.Add(playerState.crouching);
+        //ADD NEW GROUNDED STATES HERE
     }
 
 
     void FixedUpdate()
     {
-        //Crouch
-        if (CrouchInput_Held)
+        //Update grounded state
+        isGrounded = CheckIfGrounded();
+        if (!isGrounded && groundedStates.Contains(currentState))
         {
-            /*
-             *TODO: behaviour while holding crouch (down SDI,TDI and DDI, maybe other mechanics)
-             */
+            setCurrentState(playerState.airborne);
+            animator.SetTrigger("GoAirborne");
         }
+        if (isGrounded && currentState == playerState.airborne)
+        {
+            setCurrentState(playerState.grounded_idle);
+            animator.SetTrigger("BeginLanding");
+        }
+
+        if (isGrounded)
+        {
+            jumpsRemaining = maxNumMidairJumps;
+            gravity.SetGravity(fallAcceleration);
+
+        }
+        
+        //Ensure running animation doesn't play when not running
+        if(currentState == playerState.grounded_idle)
+        {
+            animator.ResetTrigger("StartRunning");
+        }
+
     }
 
-    // Change player state
+
+    //Change player state
     public void setCurrentState(playerState state)
     {
         currentState = state;
     }
 
 
-    //Called when crouch is inputted
-    public void CrouchInput(InputAction.CallbackContext context)
+    //Check if grounded
+    public bool CheckIfGrounded()
     {
-        Debug.Log(context.phase);
-
-        switch (context.phase)
-        {
-            case InputActionPhase.Started:
-                setCurrentState(playerState.crouching);
-                CrouchInput_Held = true;
-                animator.SetTrigger("StartCrouching");
-                break;
-                /*TODO - different actions depending on context of input
-                 * 
-                 * idle_grounded, walking or running: crouch
-                 * sprinting, jumpsquat or deep into an attack: ignore input initially but store for TDI
-                 * within a few frames of/simultaneously with inputting an attack: down attack
-                 * idle_air: fastfall
-                 * hitlag: store for downwards TDI
-                 * knockback: downwards drift DI
-                 */
-
-            case InputActionPhase.Canceled:
-                //Update control state
-                CrouchInput_Held = false;
-                //Cancel crouch input depending on player state
-                switch (currentState)
-                {
-                    //If player was crouching, transition to idle pose
-                    case playerState.crouching:
-                        setCurrentState(playerState.grounded_idle);
-                        animator.SetTrigger("StandStill");
-                        break;
-                }
-                break;
-        }
+        return Physics.Raycast(GetComponent<Collider>().bounds.center, -Vector3.up, distToGround + 0.1f);
     }
+
+    public int GetJumpsRemaining()
+    {
+        return jumpsRemaining;
+    }
+
+    public void DecrementJumpsRemaining()
+    {
+        jumpsRemaining = Mathf.Max(0, jumpsRemaining - 1);
+    }
+
 }

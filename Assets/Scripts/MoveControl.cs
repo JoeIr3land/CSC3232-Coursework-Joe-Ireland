@@ -80,7 +80,6 @@ public class MoveControl : MonoBehaviour
                 switch (player.currentState)
                 {
                     case PlayerChar.playerState.grounded_idle:
-                    case PlayerChar.playerState.crouching:
                         player.setCurrentState(PlayerChar.playerState.running);
                         animator.SetTrigger("StartRunning");
                         break;   

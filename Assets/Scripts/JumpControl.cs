@@ -86,6 +86,7 @@ public class JumpControl : MonoBehaviour
                     float magnitude = Mathf.Lerp(player.jumpStrengthMin, player.jumpStrengthMax, jumpCharge / 30);
                     PerformJump(magnitude);
                     JumpInput_Held = false;
+                    animator.ResetTrigger("BeginJumpSquat");
                 }
                 break;
                 
@@ -103,7 +104,7 @@ public class JumpControl : MonoBehaviour
         velocity.y = jumpStrength;
 
         //For midair jumps - jump in a different direction to existing momentum
-        if (moveInput.MoveInput_Held == true)
+        if (!player.CheckIfGrounded() && moveInput.MoveInput_Held == true)
         {
             velocity.x = 0.2f * moveInput.MoveInput_Value.x * player.maxAirSpeed;
             velocity.z = 0.2f * moveInput.MoveInput_Value.y * player.maxAirSpeed;

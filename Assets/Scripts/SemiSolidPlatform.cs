@@ -21,7 +21,7 @@ public class SemiSolidPlatform : MonoBehaviour
         foreach (GameObject fighter in fighters)
         {
 
-            if (fighter.transform.position.y < platformHeight)
+            if (fighter.transform.position.y < platformHeight || fighter.GetComponent<CrouchControl>().CrouchInput_Held)
             {
                 Physics.IgnoreCollision(GetComponent<Collider>(), fighter.GetComponent<Collider>(), true);
             }

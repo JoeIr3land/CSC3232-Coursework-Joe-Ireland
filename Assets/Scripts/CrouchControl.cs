@@ -13,7 +13,7 @@ public class CrouchControl : MonoBehaviour
     VariableGravity gravity;
 
     //Controls State
-    bool CrouchInput_Held;
+    public bool CrouchInput_Held;
 
     void OnEnable()
     {

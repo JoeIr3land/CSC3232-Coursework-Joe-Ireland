@@ -75,11 +75,14 @@ public class PlayerChar : MonoBehaviour
         {
             setCurrentState(playerState.airborne);
             animator.SetTrigger("GoAirborne");
+            animator.ResetTrigger("BeginLanding");
         }
         if (isGrounded && currentState == playerState.airborne)
         {
             setCurrentState(playerState.grounded_idle);
+            Debug.Log("Landing...");
             animator.SetTrigger("BeginLanding");
+            animator.ResetTrigger("GoAirborne");
         }
 
         if (isGrounded)
@@ -108,7 +111,11 @@ public class PlayerChar : MonoBehaviour
     //Check if grounded
     public bool CheckIfGrounded()
     {
-        return Physics.Raycast(GetComponent<Collider>().bounds.center, -Vector3.up, distToGround + 0.1f);
+        if(body.velocity.y <= 0) //So that player doesn't briefly grounded when going up through a platform
+        {
+            return Physics.Raycast(GetComponent<Collider>().bounds.center, -Vector3.up, distToGround + 0.1f);
+        }
+        else { return false; }
     }
 
     public int GetJumpsRemaining()

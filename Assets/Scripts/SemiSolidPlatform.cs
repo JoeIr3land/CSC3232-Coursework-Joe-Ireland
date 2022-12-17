@@ -11,8 +11,8 @@ public class SemiSolidPlatform : MonoBehaviour
     void OnEnable()
     {
         platformHeight = transform.position.y;
+        Debug.Log(platformHeight);
         fighters = GameObject.FindGameObjectsWithTag("Player");
-        Debug.Log(fighters[0]);
     }
 
     void FixedUpdate()
@@ -20,14 +20,22 @@ public class SemiSolidPlatform : MonoBehaviour
         //If a player is below the platform, ignore collision detection between them
         foreach (GameObject fighter in fighters)
         {
+            Component[] collidersInFighter = fighter.GetComponent<PlayerChar>().GetHitboxes();
 
-            if (fighter.transform.position.y < platformHeight || fighter.GetComponent<CrouchControl>().CrouchInput_Held)
+            // +0.3f because the global position for the player is offset compared to the platform somehow? +0.3f stops player from falling through as long as they aren't crouching
+            if (fighter.transform.position.y + 0.3f < platformHeight || fighter.GetComponent<CrouchControl>().CrouchInput_Held)
             {
-                Physics.IgnoreCollision(GetComponent<Collider>(), fighter.GetComponent<Collider>(), true);
+                foreach (Component collider in collidersInFighter)
+                {
+                    Physics.IgnoreCollision(this.GetComponent<Collider>(), collider.GetComponent<Collider>(), true);
+                }
             }
             else
             {
-                Physics.IgnoreCollision(GetComponent<Collider>(), fighter.GetComponent<Collider>(), false);
+                foreach (Component collider in collidersInFighter)
+                {
+                    Physics.IgnoreCollision(this.GetComponent<Collider>(), collider.GetComponent<Collider>(), false);
+                }
             }
         }
     }

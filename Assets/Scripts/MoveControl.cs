@@ -41,6 +41,7 @@ public class MoveControl : MonoBehaviour
                 // If player is running, continue running
                 case PlayerChar.playerState.running:
                     Run(MoveInput_Value);
+                    animator.SetTrigger("StartRunning");
                     break;
                 // If player holds a movement direction and becomes actionable, start running
                 case PlayerChar.playerState.grounded_idle:
@@ -60,6 +61,10 @@ public class MoveControl : MonoBehaviour
             * May need to add behaviour for other transitions, depending on if something happens to the player
             * but they don't change their input (input would now apply to new context)
             */
+        }
+        else
+        {
+            animator.ResetTrigger("StartRunning");
         }
     }
 

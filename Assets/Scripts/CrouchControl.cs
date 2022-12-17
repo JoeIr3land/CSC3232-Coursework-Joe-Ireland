@@ -29,6 +29,13 @@ public class CrouchControl : MonoBehaviour
         //Crouch
         if (CrouchInput_Held)
         {
+            switch (player.currentState)
+            {
+                case PlayerChar.playerState.grounded_idle:
+                    player.setCurrentState(PlayerChar.playerState.crouching);
+                    animator.SetTrigger("StartCrouching");
+                    break;
+            }
             /*
              *TODO: behaviour while holding crouch (down SDI,TDI and DDI, maybe other mechanics)
              */

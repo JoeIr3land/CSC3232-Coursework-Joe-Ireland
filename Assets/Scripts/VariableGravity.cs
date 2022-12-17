@@ -4,7 +4,8 @@ using UnityEngine;
 
 public class VariableGravity : MonoBehaviour
 {
-    public float gravityScale;
+    private float gravityScale;
+    [SerializeField]
     private float globalGravity = -9.81f;
     PlayerChar player;
     Rigidbody body;

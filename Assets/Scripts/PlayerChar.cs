@@ -28,68 +28,107 @@ public class PlayerChar : MonoBehaviour
 
     //Character Stats
     private bool isGrounded;
-    private float distToGround;
+    private float leftDistToGround;
+    private float rightDistToGround;
     private int jumpsRemaining;
 
-    //Components
+    //Components and Children
     Rigidbody body;
     Animator animator;
     VariableGravity gravity;
+    Component[] hitboxes;
+    private Transform leftFoot;
+    private Transform rightFoot;
 
     //Player State
     public enum playerState { grounded_idle, running, crouching, airborne }
     [SerializeField]
     public playerState currentState;
-    private List<playerState> groundedStates;
 
 
     void OnEnable()
     {
-
-        //Set initial player state
-        setCurrentState(playerState.grounded_idle);
-        jumpsRemaining = maxNumMidairJumps;
 
         //Get components
         body = GetComponent<Rigidbody>();
         gravity = GetComponent<VariableGravity>();
         gravity.SetGravity(fallAcceleration);
         animator = GetComponent<Animator>();
+        hitboxes = GetComponentsInChildren<Collider>();
 
         //Setup for checking if grounded
-        distToGround = GetComponent<Collider>().bounds.extents.y;
+
+        leftFoot = FindChildByName(this.transform, "mixamorig:LeftLeg");
+        rightFoot = FindChildByName(this.transform, "mixamorig:RightLeg");
+        leftDistToGround = leftFoot.GetComponent<Collider>().bounds.extents.y;
+        rightDistToGround = rightFoot.GetComponent<Collider>().bounds.extents.y;
         isGrounded = CheckIfGrounded();
-        groundedStates = new List<playerState>();
-        groundedStates.Add(playerState.grounded_idle);
-        groundedStates.Add(playerState.running);
-        groundedStates.Add(playerState.crouching);
-        //ADD NEW GROUNDED STATES HERE
+
+        //Set initial player state
+        setCurrentState(playerState.grounded_idle);
+        jumpsRemaining = maxNumMidairJumps;
     }
 
 
     void FixedUpdate()
     {
+
         //Update grounded state
         isGrounded = CheckIfGrounded();
-        if (!isGrounded && groundedStates.Contains(currentState))
-        {
-            setCurrentState(playerState.airborne);
-            animator.SetTrigger("GoAirborne");
-            animator.ResetTrigger("BeginLanding");
-        }
-        if (isGrounded && currentState == playerState.airborne)
-        {
-            setCurrentState(playerState.grounded_idle);
-            Debug.Log("Landing...");
-            animator.SetTrigger("BeginLanding");
-            animator.ResetTrigger("GoAirborne");
-        }
+
+        Debug.Log(isGrounded);
+        Debug.Log(currentState);
 
         if (isGrounded)
         {
-            jumpsRemaining = maxNumMidairJumps;
-            gravity.SetGravity(fallAcceleration);
+            bool landingThisFrame = false; //For preventing landing animation from playing twice, or being ignored
 
+            //Stops player getting stuck in falling animation
+            if (animator.GetCurrentAnimatorStateInfo(0).IsName("Airborne"))
+            {
+                Debug.Log("Falling on ground detected");
+                landingThisFrame = true;
+                animator.SetTrigger("BeginLanding");
+            }
+
+            //Workaround - so that falling through a platform without landing doesn't give you back midair jumps
+            if (body.velocity.y == 0)
+            {
+                jumpsRemaining = maxNumMidairJumps;
+                gravity.SetGravity(fallAcceleration);
+            }
+            
+            switch (currentState)
+            {
+                case playerState.grounded_idle:
+                case playerState.running:
+                case playerState.crouching:
+                    if (!landingThisFrame)
+                    {
+                        animator.ResetTrigger("BeginLanding");
+                    }
+                    landingThisFrame = false;
+                    break;
+                case playerState.airborne:
+                    animator.SetTrigger("BeginLanding");
+                    animator.ResetTrigger("GoAirborne");
+                    setCurrentState(playerState.grounded_idle);
+                    break;
+            }
+
+        }
+        else
+        {
+            switch (currentState)
+            {
+                case playerState.grounded_idle:
+                case playerState.running:
+                case playerState.crouching:
+                    setCurrentState(playerState.airborne);
+                    animator.SetTrigger("GoAirborne");
+                    animator.ResetTrigger("BeginLanding");
+                    break;
+            }
         }
         
         //Ensure running animation doesn't play when not running
@@ -111,21 +150,52 @@ public class PlayerChar : MonoBehaviour
     //Check if grounded
     public bool CheckIfGrounded()
     {
-        if(body.velocity.y <= 0) //So that player doesn't briefly grounded when going up through a platform
+        // Always returns false if player has upwards velocity - stops player from being able to do grounded actions when jumping up through a platform
+        if (body.velocity.y < 0.1)
         {
-            return Physics.Raycast(GetComponent<Collider>().bounds.center, -Vector3.up, distToGround + 0.1f);
+            bool leftCheck = Physics.Raycast(leftFoot.GetComponent<Collider>().bounds.center, -Vector3.up, leftDistToGround + 0.1f);
+            bool rightCheck = Physics.Raycast(rightFoot.GetComponent<Collider>().bounds.center, -Vector3.up, rightDistToGround + 0.1f);
+            return (leftCheck || rightCheck);
         }
-        else { return false; }
+        else return false;
+
     }
+
 
     public int GetJumpsRemaining()
     {
         return jumpsRemaining;
     }
 
+
     public void DecrementJumpsRemaining()
     {
         jumpsRemaining = Mathf.Max(0, jumpsRemaining - 1);
     }
 
+
+    private Transform FindChildByName(Transform transform, string name)
+    {
+        foreach (Transform child in transform)
+        {
+            if (child.name == name)
+            {
+                return child;
+            }
+            else if (child.childCount > 0)
+            {
+                Transform checkChildren = FindChildByName(child, name);
+                if (checkChildren != null)
+                {
+                    return checkChildren;
+                }
+            }
+        }
+        return null;
+    }
+
+    public Component[] GetHitboxes()
+    {
+        return hitboxes;
+    }
 }

@@ -4,6 +4,14 @@ using UnityEngine;
 
 public class BlastZone : MonoBehaviour
 {
+    AudioSource clip;
+
+    void OnEnable()
+    {
+        clip = GetComponent<AudioSource>();
+    }
+
+
     void OnTriggerExit(Collider other)
     {
         PlayerChar player = other.GetComponentInParent<PlayerChar>();
@@ -11,6 +19,8 @@ public class BlastZone : MonoBehaviour
         if (player != null)
         {
             player.KillPlayer();
+            clip.Play();
+
         }
     }
 }

@@ -32,6 +32,7 @@ public class PlayerChar : MonoBehaviour
     Rigidbody body;
     Animator animator;
     VariableGravity gravity;
+    AudioSource clip;
     Component[] hurtboxes;
     private Transform leftFoot;
     private Transform rightFoot;
@@ -63,6 +64,7 @@ public class PlayerChar : MonoBehaviour
         body = GetComponent<Rigidbody>();
         gravity = GetComponent<VariableGravity>();
         gravity.SetGravity(fallAcceleration);
+        clip = GetComponent<AudioSource>();
         animator = GetComponent<Animator>();
         hurtboxes = GetComponentsInChildren<Collider>();
         model = FindChildByName(this.transform, "Model");
@@ -303,6 +305,8 @@ public class PlayerChar : MonoBehaviour
             currentState = playerState.hitstun;
             animator.SetTrigger("KnockBack");
         }
+
+        clip.Play();
 
     }
 

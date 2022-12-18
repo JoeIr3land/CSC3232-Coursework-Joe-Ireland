@@ -51,8 +51,7 @@ public class EnemyBehaviour : MonoBehaviour
             float distanceToTarget = (targetPos - transform.position).magnitude;
 
             // If player is dead, enemy heads to middle of stage
-            //If, from the enemy's perspective, the centre of the stage is further away than the player, go towards centre stage, because it intuitively means player has stage position advantage
-            if (!(targetPlayer.GetComponent<PlayerChar>().IsAlive()) || distanceToTarget < transform.position.magnitude)
+            if (!(targetPlayer.GetComponent<PlayerChar>().IsAlive()))
             {
                 targetPos = Vector3.zero;
             }
@@ -96,13 +95,6 @@ public class EnemyBehaviour : MonoBehaviour
                                     break;
                                 case 5: //Run away from player
                                     runDir = new Vector2(-(targetPos.x - transform.position.x), -(targetPos.z - transform.position.z));
-                                    runDir.Normalize();
-                                    moveControl.EnemyRun(runDir);
-                                    playerChar.setCurrentState(PlayerChar.playerState.running);
-                                    animator.SetTrigger("StartRunning");
-                                    break;
-                                case 6: //Keep running towards player
-                                    runDir = new Vector2((targetPos.x - transform.position.x), (targetPos.z - transform.position.z));
                                     runDir.Normalize();
                                     moveControl.EnemyRun(runDir);
                                     playerChar.setCurrentState(PlayerChar.playerState.running);
@@ -191,7 +183,7 @@ public class EnemyBehaviour : MonoBehaviour
                             case 7: //Fastfall
                                 gravity.SetGravity(playerChar.fastFallAcceleration);
                                 break;
-                            case 8: //Midair jump if below player (Preserves them for recovery
+                            case 8: //Midair jump if below player (Preserves them for recovery)
                                 if(targetPlayer.transform.position.y > transform.position.y)
                                 {
                                     if (playerChar.GetJumpsRemaining() > 0)

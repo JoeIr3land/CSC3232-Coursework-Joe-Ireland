@@ -185,6 +185,7 @@ public class MoveControl : MonoBehaviour
         camR.Normalize();
         var relativeMoveDir = camF * moveDir.y + camR * moveDir.x;
 
+
         //Change player orientation if not attacking
         if (player.currentState == PlayerChar.playerState.airborne)
         {
@@ -197,6 +198,40 @@ public class MoveControl : MonoBehaviour
         Vector2 horizontalVelocity = new Vector2(body.velocity.x, body.velocity.z);
         
         if(horizontalVelocity.magnitude >= player.maxAirSpeed)
+        {
+            Vector3 newVelocity = body.velocity.normalized * player.maxAirSpeed;
+            newVelocity.y = body.velocity.y; //Preserve vertical velocity
+            body.velocity = newVelocity;
+        }
+    }
+
+    public void EnemyRun(Vector2 moveDir)
+    {
+        //Change enemy orientation
+        Vector3 lookDirection = new Vector3(moveDir.x, 0.0f, moveDir.y);
+        transform.rotation = Quaternion.LookRotation(lookDirection);
+
+        //Move enemy
+        Vector3 velocity = body.velocity;
+        velocity.x = moveDir.x * player.groundSpeed;
+        velocity.z = moveDir.y * player.groundSpeed;
+        body.velocity = velocity;
+    }
+
+    public void EnemyAerialDrift(Vector2 moveDir)
+    {
+        //Change enemy orientation if not attacking
+        if (player.currentState == PlayerChar.playerState.airborne)
+        {
+            Vector3 lookDirection = new Vector3(moveDir.x, 0.0f, moveDir.y);
+            transform.rotation = Quaternion.LookRotation(lookDirection);
+        }
+
+        //Accelerate until enemy reaches max air speed
+        body.AddForce(moveDir.x * player.airAcceleration, 0, moveDir.y * player.airAcceleration);
+        Vector2 horizontalVelocity = new Vector2(body.velocity.x, body.velocity.y);
+
+        if (horizontalVelocity.magnitude >= player.maxAirSpeed)
         {
             Vector3 newVelocity = body.velocity.normalized * player.maxAirSpeed;
             newVelocity.y = body.velocity.y; //Preserve vertical velocity

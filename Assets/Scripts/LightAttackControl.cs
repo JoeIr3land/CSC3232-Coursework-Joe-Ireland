@@ -136,7 +136,6 @@ public class LightAttackControl : MonoBehaviour
 
     public void GroundedNeutralAttack()
     {
-        Debug.Log("Grounded Neutral Attack");
         player.currentState = PlayerChar.playerState.grounded_attack;
 
         animator.SetTrigger("Grounded_Neutral_Attack");
@@ -145,7 +144,6 @@ public class LightAttackControl : MonoBehaviour
 
     public void GroundedForwardAttack()
     {
-        Debug.Log("Grounded Forward Attack");
         player.currentState = PlayerChar.playerState.grounded_attack;
 
         //Add upwards force to prevent player from falling to the ground during attack + some forward force to boose player forward during this attack
@@ -158,7 +156,6 @@ public class LightAttackControl : MonoBehaviour
 
     public void GroundedDownAttack()
     {
-        Debug.Log("Grounded Down Attack");
         player.currentState = PlayerChar.playerState.grounded_attack;
 
         animator.SetTrigger("Grounded_Down_Attack");
@@ -166,7 +163,6 @@ public class LightAttackControl : MonoBehaviour
 
     public void GroundedUpAttack()
     {
-        Debug.Log("Grounded Up Attack");
         player.currentState = PlayerChar.playerState.grounded_attack;
 
         Vector3 forceToAdd = new Vector3(0f, 4.2f, 0f);
@@ -177,7 +173,6 @@ public class LightAttackControl : MonoBehaviour
 
     public void AerialNeutralAttack()
     {
-        Debug.Log("Aerial Neutral Attack");
         player.currentState = PlayerChar.playerState.aerial_attack;
 
         animator.SetTrigger("Aerial_Neutral_Attack");
@@ -185,7 +180,6 @@ public class LightAttackControl : MonoBehaviour
 
     public void AerialForwardAttack()
     {
-        Debug.Log("Aerial Forward Attack");
         player.currentState = PlayerChar.playerState.aerial_attack;
 
         animator.SetTrigger("Aerial_Forward_Attack");
@@ -193,7 +187,6 @@ public class LightAttackControl : MonoBehaviour
 
     public void AerialDownAttack()
     {
-        Debug.Log("Aerial Down Attack");
         player.currentState = PlayerChar.playerState.aerial_attack;
 
         //So that you can use the attack without fastfalling
@@ -204,7 +197,6 @@ public class LightAttackControl : MonoBehaviour
 
     public void AerialUpAttack()
     {
-        Debug.Log("Aerial Up Attack");
         player.currentState = PlayerChar.playerState.aerial_attack;
 
         //Player gains height when using this attack - like an extra double jump

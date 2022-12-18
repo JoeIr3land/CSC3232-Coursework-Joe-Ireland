@@ -276,20 +276,33 @@ public class PlayerChar : MonoBehaviour
 
     public void ApplyDamage(float damage, float knockbackBase, float knockbackScale, Vector3 knockbackAngle)
     {
-        damageStat += damage;
+        float effectScale = 1f;
+
+        //Apply reductions due to crouching - Crouching acts like a block - it halves damage/knockback and prevents going into hitstun
+        if(currentState == playerState.crouching)
+        {
+            effectScale = 0.5f;
+            knockbackAngle.y = 0f;
+        }
+
+        damageStat += (damage*effectScale);
 
         // Knockback calculation formula (based on SSB knockback formula)
-        float knockbackMagnitude = (((((damageStat / 10f) + ((damageStat * damage) / 20f)) * (200f / (body.mass + 100f)) * 1.4f) + 18f) * (knockbackScale / 100f)) + knockbackBase;
-        hitstunFramesRemaining = 4f * knockbackMagnitude;
-        Debug.Log(hitstunFramesRemaining);
+        float knockbackMagnitude = ((((((damageStat / 10f) + ((damageStat * damage) / 20f)) * (200f / (body.mass + 100f)) * 1.4f) + 18f) * (knockbackScale / 100f)) + knockbackBase) * effectScale;
+        hitstunFramesRemaining = 4f * knockbackMagnitude * effectScale;
 
         // Reset player velocity before launching
         body.velocity = Vector3.zero;
+
+        // Launch player - if crouching, player is knocked back but not up
         body.AddForce(knockbackAngle.normalized * knockbackMagnitude, ForceMode.Impulse);
 
         // Put player in hitstun state and enable ragdoll
-        currentState = playerState.hitstun;
-        animator.SetTrigger("KnockBack");
+        if(currentState != playerState.crouching)
+        {
+            currentState = playerState.hitstun;
+            animator.SetTrigger("KnockBack");
+        }
 
     }
 

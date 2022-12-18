@@ -10,7 +10,6 @@ public class BlastZone : MonoBehaviour
 
         if (player != null)
         {
-            Debug.Log("Killing:" + other.name);
             player.KillPlayer();
         }
     }

@@ -50,13 +50,17 @@ public class CrouchControl : MonoBehaviour
         }
         else
         {
-            //Ensure crouch animation doesn't play when not crouching
-            animator.ResetTrigger("StartCrouching");
-            if(player.currentState == PlayerChar.playerState.crouching)
+            if (GetComponent<EnemyBehaviour>() == null)
             {
-                player.setCurrentState(PlayerChar.playerState.grounded_idle);
-                animator.SetTrigger("StandStill");
+                //Ensure crouch animation doesn't play when not crouching
+                animator.ResetTrigger("StartCrouching");
+                if (player.currentState == PlayerChar.playerState.crouching)
+                {
+                    player.setCurrentState(PlayerChar.playerState.grounded_idle);
+                    animator.SetTrigger("StandStill");
+                }
             }
+
         }
     }
 

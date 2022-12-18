@@ -61,7 +61,6 @@ public class CameraMovement : MonoBehaviour
             Vector3 closestPosition = Vector3.positiveInfinity;
             foreach(GameObject target in staticTargets)
             {
-                Debug.Log(target.transform.position);
                 Vector3 distanceToClosestTarget = closestPosition - transform.position;
                 Vector3 distanceToThisTarget = target.transform.position - transform.position;
                 if (distanceToThisTarget.magnitude <= distanceToClosestTarget.magnitude)

@@ -46,8 +46,17 @@ public class EnemyBehaviour : MonoBehaviour
         if(frameCounter >= framesBetweenDecisions)
         {
             frameCounter = 0;
+
             Vector3 targetPos = targetPlayer.transform.position;
             float distanceToTarget = (targetPos - transform.position).magnitude;
+
+            // If player is dead, enemy heads to middle of stage
+            //If, from the enemy's perspective, the centre of the stage is further away than the player, go towards centre stage, because it intuitively means player has stage position advantage
+            if (!(targetPlayer.GetComponent<PlayerChar>().IsAlive()) || distanceToTarget < transform.position.magnitude)
+            {
+                targetPos = Vector3.zero;
+            }
+
             Vector2 runDir;
 
             switch (playerChar.currentState)
@@ -59,59 +68,87 @@ public class EnemyBehaviour : MonoBehaviour
                     //If within attack range, do random thing
                     if (distanceToTarget <= distanceThresholdToAttack)
                     {
-                        int randomDecision = Random.Range(1, 5);
-                        switch (randomDecision)
+                        //If player is attacking while enemy is in range, enemy tries to block by crouching
+                        if(targetPlayer.GetComponent<PlayerChar>().currentState == PlayerChar.playerState.grounded_attack || targetPlayer.GetComponent<PlayerChar>().currentState == PlayerChar.playerState.aerial_attack)
                         {
-                            case 1:// Random grounded attack
-                                attackControl.GroundedNeutralAttack();
-                                break;
-                            case 2:
-                                attackControl.GroundedForwardAttack();
-                                break;
-                            case 3:
-                                attackControl.GroundedUpAttack();
-                                break;
-                            case 4:
-                                attackControl.GroundedDownAttack();
-                                break;
+                            Debug.Log("Attempting to block");
+                            playerChar.setCurrentState(PlayerChar.playerState.crouching);
+                            animator.SetTrigger("StartCrouching");
+                            break;
                         }
+                        //Else throw attacks out
+                        else
+                        {
+                            int randomDecision = Random.Range(1, 6);
+                            switch (randomDecision)
+                            {
+                                case 1:// 1-4 Random grounded attack
+                                    attackControl.GroundedNeutralAttack();
+                                    break;
+                                case 2:
+                                    attackControl.GroundedForwardAttack();
+                                    break;
+                                case 3:
+                                    attackControl.GroundedUpAttack();
+                                    break;
+                                case 4:
+                                    attackControl.GroundedDownAttack();
+                                    break;
+                                case 5: //Run away from player
+                                    runDir = new Vector2(-(targetPos.x - transform.position.x), -(targetPos.z - transform.position.z));
+                                    runDir.Normalize();
+                                    moveControl.EnemyRun(runDir);
+                                    playerChar.setCurrentState(PlayerChar.playerState.running);
+                                    animator.SetTrigger("StartRunning");
+                                    break;
+                                case 6: //Keep running towards player
+                                    runDir = new Vector2((targetPos.x - transform.position.x), (targetPos.z - transform.position.z));
+                                    runDir.Normalize();
+                                    moveControl.EnemyRun(runDir);
+                                    playerChar.setCurrentState(PlayerChar.playerState.running);
+                                    animator.SetTrigger("StartRunning");
+                                    break;
+                            }
+                        }
+                        
                     }
                     //If not in range, do random movement
                     else
                     {
-                        int randomDecision = Random.Range(1, 6);
+                        int randomDecision = Random.Range(1, 21);
                         switch (randomDecision)
                         {
-                            case 1: //1-4 : Run in random cardinal direction
-                                runDir = new Vector2(0, -1);
-                                moveControl.Run(runDir);
+                            case 1: //Run towards the player 90% of the time
+                            case 2:
+                            case 3:
+                            case 4:
+                            case 5:
+                            case 6:
+                            case 7:
+                            case 8:
+                            case 9:
+                            case 10:
+                            case 11:
+                            case 12:
+                            case 13:
+                            case 14:
+                            case 15:
+                            case 16:
+                            case 17:
+                            case 18:
+                                runDir = new Vector2((targetPos.x - transform.position.x), (targetPos.z - transform.position.z));
+                                runDir.Normalize();
+                                moveControl.EnemyRun(runDir);
                                 playerChar.setCurrentState(PlayerChar.playerState.running);
                                 animator.SetTrigger("StartRunning");
                                 break;
-                            case 2: 
-                                runDir = new Vector2(0, 1);
-                                moveControl.Run(runDir);
-                                playerChar.setCurrentState(PlayerChar.playerState.running);
-                                animator.SetTrigger("StartRunning");
-                                break;
-                            case 3: 
-                                runDir = new Vector2(-1, 0);
-                                moveControl.Run(runDir);
-                                playerChar.setCurrentState(PlayerChar.playerState.running);
-                                animator.SetTrigger("StartRunning");
-                                break;
-                            case 4: 
-                                runDir = new Vector2(1, 0);
-                                moveControl.Run(runDir);
-                                playerChar.setCurrentState(PlayerChar.playerState.running);
-                                animator.SetTrigger("StartRunning");
-                                break;
-                            case 5: //Crouch
+                            case 19: //Crouch
                                 playerChar.setCurrentState(PlayerChar.playerState.crouching);
                                 animator.SetTrigger("StartCrouching");
                                 break;
-                            case 6: //Jump
-                                jumpControl.PerformJump(playerChar.jumpStrengthMin);
+                            case 20: //Jump
+                                float randomJumpHeight = Random.Range(playerChar.jumpStrengthMin, playerChar.jumpStrengthMax);
+                                jumpControl.PerformJump(randomJumpHeight);
                                 break;
                         }
                     }
@@ -138,33 +175,34 @@ public class EnemyBehaviour : MonoBehaviour
                     }
                     else
                     {
-                        int randomDecision = Random.Range(1, 6);
+                        int randomDecision = Random.Range(1, 9);
                         switch (randomDecision)
                         {
-                            case 1: //1-4 : Move in random cardinal direction
-                                runDir = new Vector2(0, -1);
-                                moveControl.Run(runDir);
-                                break;
+                            case 1: //Move towards player 3/4 of the time
                             case 2:
-                                runDir = new Vector2(0, 1);
-                                moveControl.Run(runDir);
-                                break;
-                            case 3: 
-                                runDir = new Vector2(-1, 0);
-                                moveControl.Run(runDir);
-                                break;
+                            case 3:
                             case 4:
-                                runDir = new Vector2(1, 0);
-                                moveControl.Run(runDir);
+                            case 5:
+                            case 6:
+                                runDir = new Vector2((targetPos.x - transform.position.x), (targetPos.z - transform.position.z));
+                                runDir.Normalize();
+                                moveControl.EnemyAerialDrift(runDir);
                                 break;
-                            case 5: //Fastfall
+                            case 7: //Fastfall
                                 gravity.SetGravity(playerChar.fastFallAcceleration);
                                 break;
-                            case 6: //Midair jump
-                                if (playerChar.GetJumpsRemaining() > 0)
+                            case 8: //Midair jump if below player (Preserves them for recovery
+                                if(targetPlayer.transform.position.y > transform.position.y)
                                 {
-                                    jumpControl.PerformJump(playerChar.midairJumpStrength);
-                                    playerChar.DecrementJumpsRemaining();
+                                    if (playerChar.GetJumpsRemaining() > 0)
+                                    {
+                                        jumpControl.PerformJump(playerChar.midairJumpStrength);
+                                        playerChar.DecrementJumpsRemaining();
+                                    }
+                                    else
+                                    {
+                                        attackControl.AerialUpAttack();
+                                    }
                                 }
                                 break;
                         }

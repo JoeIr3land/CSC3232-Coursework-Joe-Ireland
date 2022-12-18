@@ -14,7 +14,7 @@ public class JumpControl : MonoBehaviour
     VariableGravity gravity;
 
     //Controls state
-    bool JumpInput_Held;
+    public bool JumpInput_Held;
     float jumpCharge;
     [SerializeField]
     float chargeTime;
@@ -32,7 +32,7 @@ public class JumpControl : MonoBehaviour
 
     void FixedUpdate()
     {
-        if(JumpInput_Held)
+        if(JumpInput_Held && player.CheckIfGrounded() && player.currentState == PlayerChar.playerState.grounded_jumpsquat)
         {
             //Hold for 1/2 second to charge jump
             jumpCharge = Mathf.Min(jumpCharge + 1, chargeTime);
@@ -56,7 +56,9 @@ public class JumpControl : MonoBehaviour
         switch (context.phase)
         {
             //When button is first held
-            case InputActionPhase.Started: 
+            case InputActionPhase.Started:
+
+                JumpInput_Held = true;
                 //Check player state and choose action accordingly
                 switch (player.currentState)
                 {
@@ -64,7 +66,7 @@ public class JumpControl : MonoBehaviour
                     case PlayerChar.playerState.grounded_idle:
                     case PlayerChar.playerState.running:
                     case PlayerChar.playerState.crouching:
-                        JumpInput_Held = true;
+                        player.currentState = PlayerChar.playerState.grounded_jumpsquat;
                         animator.SetTrigger("BeginJumpSquat");
                         break;
                     //If airborne, perform midair jump
@@ -85,16 +87,16 @@ public class JumpControl : MonoBehaviour
                 {
                     float magnitude = Mathf.Lerp(player.jumpStrengthMin, player.jumpStrengthMax, jumpCharge / 30);
                     PerformJump(magnitude);
-                    JumpInput_Held = false;
-                    animator.ResetTrigger("BeginJumpSquat");
                 }
+                animator.ResetTrigger("BeginJumpSquat");
+                JumpInput_Held = false;
                 break;
                 
 
         }
     }
 
-    private void PerformJump(float jumpStrength)
+    public void PerformJump(float jumpStrength)
     {
 
         //Reset fall acceleration in case player was fast-falling

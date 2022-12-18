@@ -26,6 +26,14 @@ public class CrouchControl : MonoBehaviour
 
     void FixedUpdate()
     {
+
+        if(player.currentState == PlayerChar.playerState.crouching)
+        {
+            animator.SetTrigger("StartCrouching");
+            animator.ResetTrigger("StartRunning");
+        }
+
+
         //Crouch
         if (CrouchInput_Held)
         {
@@ -44,6 +52,11 @@ public class CrouchControl : MonoBehaviour
         {
             //Ensure crouch animation doesn't play when not crouching
             animator.ResetTrigger("StartCrouching");
+            if(player.currentState == PlayerChar.playerState.crouching)
+            {
+                player.setCurrentState(PlayerChar.playerState.grounded_idle);
+                animator.SetTrigger("StandStill");
+            }
         }
     }
 
@@ -55,23 +68,24 @@ public class CrouchControl : MonoBehaviour
         {
             case InputActionPhase.Started:
 
+                CrouchInput_Held = true;
+
                 switch (player.currentState)
                 {
                     // If player is grounded/actionable, begin crouching
                     case PlayerChar.playerState.grounded_idle:
                     case PlayerChar.playerState.running:
                         player.setCurrentState(PlayerChar.playerState.crouching);
-                        CrouchInput_Held = true;
-                        animator.SetTrigger("StartCrouching");
+                         animator.SetTrigger("StartCrouching");
                         break;
                     // If player is airborne, fastfall if past apex of jump
                     case PlayerChar.playerState.airborne:
+                    case PlayerChar.playerState.aerial_attack:
                         if(body.velocity.y <= 0)
                         {
                             gravity.SetGravity(player.fastFallAcceleration);
                         }
                         // If player holds crouch while landing, they will crouch on the ground
-                        CrouchInput_Held = true;
                         animator.SetTrigger("StartCrouching");
                         break;
                 }

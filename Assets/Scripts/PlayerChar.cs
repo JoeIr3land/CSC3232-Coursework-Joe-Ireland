@@ -26,24 +26,24 @@ public class PlayerChar : MonoBehaviour
     [SerializeField]
     public float fastFallAcceleration;
 
-    //Character Stats
-    private bool isGrounded;
-    private float leftDistToGround;
-    private float rightDistToGround;
-    private int jumpsRemaining;
-
     //Components and Children
     Rigidbody body;
     Animator animator;
     VariableGravity gravity;
-    Component[] hitboxes;
+    Component[] hurtboxes;
     private Transform leftFoot;
     private Transform rightFoot;
 
     //Player State
-    public enum playerState { grounded_idle, running, crouching, airborne }
+    public enum playerState { grounded_idle, running, crouching, grounded_jumpsquat, airborne, grounded_attack, aerial_attack, hitstun}
     [SerializeField]
     public playerState currentState;
+    private bool isGrounded;
+    private float leftDistToGround;
+    private float rightDistToGround;
+    private int jumpsRemaining;
+    private float damageStat;
+    private float hitstunFramesRemaining;
 
 
     void OnEnable()
@@ -54,10 +54,9 @@ public class PlayerChar : MonoBehaviour
         gravity = GetComponent<VariableGravity>();
         gravity.SetGravity(fallAcceleration);
         animator = GetComponent<Animator>();
-        hitboxes = GetComponentsInChildren<Collider>();
+        hurtboxes = GetComponentsInChildren<Collider>();
 
         //Setup for checking if grounded
-
         leftFoot = FindChildByName(this.transform, "mixamorig:LeftLeg");
         rightFoot = FindChildByName(this.transform, "mixamorig:RightLeg");
         leftDistToGround = leftFoot.GetComponent<Collider>().bounds.extents.y;
@@ -67,26 +66,26 @@ public class PlayerChar : MonoBehaviour
         //Set initial player state
         setCurrentState(playerState.grounded_idle);
         jumpsRemaining = maxNumMidairJumps;
+        damageStat = 0f;
+        hitstunFramesRemaining = 0f;
     }
 
 
     void FixedUpdate()
     {
+        Debug.Log(CheckIfGrounded());
+        Debug.Log(currentState);
 
         //Update grounded state
         isGrounded = CheckIfGrounded();
 
-        Debug.Log(isGrounded);
-        Debug.Log(currentState);
-
         if (isGrounded)
         {
-            bool landingThisFrame = false; //For preventing landing animation from playing twice, or being ignored
+            bool landingThisFrame = false; //Attempt at preventing landing animation from playing twice, or being ignored
 
             //Stops player getting stuck in falling animation
             if (animator.GetCurrentAnimatorStateInfo(0).IsName("Airborne"))
             {
-                Debug.Log("Falling on ground detected");
                 landingThisFrame = true;
                 animator.SetTrigger("BeginLanding");
             }
@@ -110,6 +109,7 @@ public class PlayerChar : MonoBehaviour
                     landingThisFrame = false;
                     break;
                 case playerState.airborne:
+                case playerState.aerial_attack:
                     animator.SetTrigger("BeginLanding");
                     animator.ResetTrigger("GoAirborne");
                     setCurrentState(playerState.grounded_idle);
@@ -124,6 +124,7 @@ public class PlayerChar : MonoBehaviour
                 case playerState.grounded_idle:
                 case playerState.running:
                 case playerState.crouching:
+                case playerState.grounded_jumpsquat:
                     setCurrentState(playerState.airborne);
                     animator.SetTrigger("GoAirborne");
                     animator.ResetTrigger("BeginLanding");
@@ -135,6 +136,33 @@ public class PlayerChar : MonoBehaviour
         if(currentState == playerState.grounded_idle)
         {
             animator.ResetTrigger("StartRunning");
+        }
+
+        //Hitstun state
+        if(currentState == playerState.hitstun)
+        {
+            //Exit hitstun when hitstun time ends
+            if (hitstunFramesRemaining <= 0f)
+            {
+                hitstunFramesRemaining = 0f; //Reset in case of being slightly below 0
+
+                if (isGrounded)
+                {
+                    setCurrentState(playerState.grounded_idle);
+                    animator.SetTrigger("StandStill");
+                }
+                else
+                {
+                    setCurrentState(playerState.airborne);
+                    animator.SetTrigger("GoAirborne");
+                }
+            }
+
+            if(isGrounded && animator.GetCurrentAnimatorStateInfo(0).IsName("Tumble"))
+            {
+                animator.SetTrigger("KnockDown");
+            }
+            hitstunFramesRemaining -= 1f;
         }
 
     }
@@ -174,7 +202,7 @@ public class PlayerChar : MonoBehaviour
     }
 
 
-    private Transform FindChildByName(Transform transform, string name)
+    public Transform FindChildByName(Transform transform, string name)
     {
         foreach (Transform child in transform)
         {
@@ -194,8 +222,32 @@ public class PlayerChar : MonoBehaviour
         return null;
     }
 
-    public Component[] GetHitboxes()
+    public Component[] GetHurtboxes()
     {
-        return hitboxes;
+        return hurtboxes;
+    }
+
+    public float GetDamageStat()
+    {
+        return damageStat;
+    }
+
+    public void ApplyDamage(float damage, float knockbackBase, float knockbackScale, Vector3 knockbackAngle)
+    {
+        damageStat += damage;
+
+        // Knockback calculation formula (based on SSB knockback formula)
+        float knockbackMagnitude = (((((damageStat / 10f) + ((damageStat * damage) / 20f)) * (200f / (body.mass + 100f)) * 1.4f) + 18f) * (knockbackScale / 100f)) + knockbackBase;
+        hitstunFramesRemaining = 4f * knockbackMagnitude;
+        Debug.Log(hitstunFramesRemaining);
+
+        // Reset player velocity before launching
+        body.velocity = Vector3.zero;
+        body.AddForce(knockbackAngle.normalized * knockbackMagnitude, ForceMode.Impulse);
+
+        // Put player in hitstun state and enable ragdoll
+        currentState = playerState.hitstun;
+        animator.SetTrigger("KnockBack");
+
     }
 }

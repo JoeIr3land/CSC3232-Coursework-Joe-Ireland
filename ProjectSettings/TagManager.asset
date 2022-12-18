@@ -8,16 +8,17 @@ TagManager:
   - Platform
   - Blastzone
   - Background
+  - Hurtbox
   layers:
   - Default
   - TransparentFX
   - Ignore Raycast
-  - 
+  - PlayerHurtboxes
   - Water
   - UI
-  - 
-  - 
-  - 
+  - EnemyHurtboxes
+  - PlayerHitboxes
+  - EnemyHitboxes
   - 
   - 
   - 

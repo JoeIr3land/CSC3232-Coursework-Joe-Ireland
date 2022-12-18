@@ -50,7 +50,7 @@ public class MoveControl : MonoBehaviour
                     break;
                 // If player is in the air, change trajectory according to input
                 case PlayerChar.playerState.airborne:
-                // Add cases for attacking states here - allow aerial drift
+                case PlayerChar.playerState.aerial_attack:
                     AerialDrift(MoveInput_Value);
                     break;
                 // TODO: movement when hit
@@ -157,9 +157,12 @@ public class MoveControl : MonoBehaviour
 
     void AerialDrift(Vector2 moveDir)
     {
-        //Change player orientation
-        Vector3 lookDirection = new Vector3(moveDir.x, 0.0f, moveDir.y);
-        transform.rotation = Quaternion.LookRotation(lookDirection);
+        //Change player orientation if not attacking
+        if(player.currentState == PlayerChar.playerState.airborne)
+        {
+            Vector3 lookDirection = new Vector3(moveDir.x, 0.0f, moveDir.y);
+            transform.rotation = Quaternion.LookRotation(lookDirection);
+        }
 
         //Accelerate until character reaches max air speed
         body.AddForce(moveDir.x * player.airAcceleration, 0, moveDir.y * player.airAcceleration);

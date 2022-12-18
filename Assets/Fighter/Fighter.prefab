@@ -2867,7 +2867,7 @@ Transform:
   - {fileID: 3283456230721852296}
   - {fileID: 2984364772117754098}
   m_Father: {fileID: 0}
-  m_RootOrder: 0
+  m_RootOrder: 1
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!54 &7958165737296267972
 Rigidbody:
@@ -2932,6 +2932,8 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   MoveInput_Held: 0
   MoveInput_Value: {x: 0, y: 0}
+  pivot: {fileID: 0}
+  cam: {fileID: 0}
 --- !u!114 &7958165737296267968
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -3099,7 +3101,9 @@ MonoBehaviour:
   maxNumMidairJumps: 1
   fallAcceleration: 2
   fastFallAcceleration: 6
+  maxLifeCount: 4
   currentState: 0
+  damageStat: 0
 --- !u!114 &6609933055195242384
 MonoBehaviour:
   m_ObjectHideFlags: 0

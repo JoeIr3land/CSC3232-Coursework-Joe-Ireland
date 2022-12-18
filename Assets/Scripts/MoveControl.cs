@@ -16,6 +16,12 @@ public class MoveControl : MonoBehaviour
     public bool MoveInput_Held;
     public Vector2 MoveInput_Value;
 
+    //Camera variables - make movement relative to camera
+    [SerializeField]
+    Transform pivot;
+    [SerializeField]
+    Transform cam;
+
 
     void OnEnable()
     {
@@ -142,14 +148,23 @@ public class MoveControl : MonoBehaviour
     //Called when player is in 'running' state
     void Run(Vector2 moveDir)
     {
+        //Make movement relative to camera
+        Vector3 camF = cam.forward;
+        Vector3 camR = cam.right;
+        camF.y = 0f;
+        camR.y = 0f;
+        camF.Normalize();
+        camR.Normalize();
+        var relativeMoveDir = camF * moveDir.y + camR * moveDir.x;
+
         //Change player orientation
-        Vector3 lookDirection = new Vector3(moveDir.x, 0.0f, moveDir.y);
+        Vector3 lookDirection = new Vector3(relativeMoveDir.x, 0.0f, relativeMoveDir.z);
         transform.rotation = Quaternion.LookRotation(lookDirection);
 
         //Move player
         Vector3 velocity = body.velocity;
-        velocity.x = moveDir.x * player.groundSpeed;
-        velocity.z = moveDir.y * player.groundSpeed;
+        velocity.x = relativeMoveDir.x * player.groundSpeed;
+        velocity.z = relativeMoveDir.z * player.groundSpeed;
         body.velocity = velocity;
     }
 
@@ -157,15 +172,24 @@ public class MoveControl : MonoBehaviour
 
     void AerialDrift(Vector2 moveDir)
     {
+        //Make movement relative to camera
+        Vector3 camF = cam.forward;
+        Vector3 camR = cam.right;
+        camF.y = 0f;
+        camR.y = 0f;
+        camF.Normalize();
+        camR.Normalize();
+        var relativeMoveDir = camF * moveDir.y + camR * moveDir.x;
+
         //Change player orientation if not attacking
-        if(player.currentState == PlayerChar.playerState.airborne)
+        if (player.currentState == PlayerChar.playerState.airborne)
         {
-            Vector3 lookDirection = new Vector3(moveDir.x, 0.0f, moveDir.y);
+            Vector3 lookDirection = new Vector3(relativeMoveDir.x, 0.0f, relativeMoveDir.z);
             transform.rotation = Quaternion.LookRotation(lookDirection);
         }
 
         //Accelerate until character reaches max air speed
-        body.AddForce(moveDir.x * player.airAcceleration, 0, moveDir.y * player.airAcceleration);
+        body.AddForce(relativeMoveDir.x * player.airAcceleration, 0, relativeMoveDir.z * player.airAcceleration);
         Vector2 horizontalVelocity = new Vector2(body.velocity.x, body.velocity.z);
         
         if(horizontalVelocity.magnitude >= player.maxAirSpeed)

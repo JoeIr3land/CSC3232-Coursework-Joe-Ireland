@@ -134,7 +134,7 @@ public class LightAttackControl : MonoBehaviour
         }
     }
 
-    private void GroundedNeutralAttack()
+    public void GroundedNeutralAttack()
     {
         Debug.Log("Grounded Neutral Attack");
         player.currentState = PlayerChar.playerState.grounded_attack;
@@ -143,7 +143,7 @@ public class LightAttackControl : MonoBehaviour
 
     }
 
-    private void GroundedForwardAttack()
+    public void GroundedForwardAttack()
     {
         Debug.Log("Grounded Forward Attack");
         player.currentState = PlayerChar.playerState.grounded_attack;
@@ -156,7 +156,7 @@ public class LightAttackControl : MonoBehaviour
         animator.SetTrigger("Grounded_Forward_Attack");
     }
 
-    private void GroundedDownAttack()
+    public void GroundedDownAttack()
     {
         Debug.Log("Grounded Down Attack");
         player.currentState = PlayerChar.playerState.grounded_attack;
@@ -164,7 +164,7 @@ public class LightAttackControl : MonoBehaviour
         animator.SetTrigger("Grounded_Down_Attack");
     }
 
-    private void GroundedUpAttack()
+    public void GroundedUpAttack()
     {
         Debug.Log("Grounded Up Attack");
         player.currentState = PlayerChar.playerState.grounded_attack;
@@ -175,7 +175,7 @@ public class LightAttackControl : MonoBehaviour
         animator.SetTrigger("Grounded_Up_Attack");
     }
 
-    private void AerialNeutralAttack()
+    public void AerialNeutralAttack()
     {
         Debug.Log("Aerial Neutral Attack");
         player.currentState = PlayerChar.playerState.aerial_attack;
@@ -183,7 +183,7 @@ public class LightAttackControl : MonoBehaviour
         animator.SetTrigger("Aerial_Neutral_Attack");
     }
 
-    private void AerialForwardAttack()
+    public void AerialForwardAttack()
     {
         Debug.Log("Aerial Forward Attack");
         player.currentState = PlayerChar.playerState.aerial_attack;
@@ -191,7 +191,7 @@ public class LightAttackControl : MonoBehaviour
         animator.SetTrigger("Aerial_Forward_Attack");
     }
 
-    private void AerialDownAttack()
+    public void AerialDownAttack()
     {
         Debug.Log("Aerial Down Attack");
         player.currentState = PlayerChar.playerState.aerial_attack;
@@ -202,7 +202,7 @@ public class LightAttackControl : MonoBehaviour
         animator.SetTrigger("Aerial_Down_Attack");
     }
 
-    private void AerialUpAttack()
+    public void AerialUpAttack()
     {
         Debug.Log("Aerial Up Attack");
         player.currentState = PlayerChar.playerState.aerial_attack;

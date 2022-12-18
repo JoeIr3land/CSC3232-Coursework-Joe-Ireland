@@ -300,7 +300,7 @@ public class PlayerChar : MonoBehaviour
 
         model.gameObject.SetActive(false);
         bones.gameObject.SetActive(false);
-        timeUntilRespawn = 180;
+        timeUntilRespawn = 120;
 
         Debug.Log("Player Killed");
         Debug.Log("Lives remaining: " + currentLives);

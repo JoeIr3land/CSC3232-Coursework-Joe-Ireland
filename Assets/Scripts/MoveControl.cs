@@ -35,6 +35,7 @@ public class MoveControl : MonoBehaviour
 
     void FixedUpdate()
     {
+
         //Movement
         if (MoveInput_Held)
         {
@@ -70,7 +71,10 @@ public class MoveControl : MonoBehaviour
         }
         else
         {
-            animator.ResetTrigger("StartRunning");
+            if(GetComponent<EnemyBehaviour>() == null)
+            {
+                animator.ResetTrigger("StartRunning");
+            }
         }
     }
 
@@ -146,7 +150,7 @@ public class MoveControl : MonoBehaviour
 
 
     //Called when player is in 'running' state
-    void Run(Vector2 moveDir)
+    public void Run(Vector2 moveDir)
     {
         //Make movement relative to camera
         Vector3 camF = cam.forward;
@@ -170,7 +174,7 @@ public class MoveControl : MonoBehaviour
 
     //Called when player moves in the air
 
-    void AerialDrift(Vector2 moveDir)
+    public void AerialDrift(Vector2 moveDir)
     {
         //Make movement relative to camera
         Vector3 camF = cam.forward;

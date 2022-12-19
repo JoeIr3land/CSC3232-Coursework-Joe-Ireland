@@ -29,7 +29,7 @@ public class CameraMovement : MonoBehaviour
         staticTargets = GameObject.FindGameObjectsWithTag("StaticCameraTarget");
     }
 
-    void FixedUpdate()
+    void Update()
     {
         //Move camera gradually towards closest target position
         currentTarget = ChangeTarget();

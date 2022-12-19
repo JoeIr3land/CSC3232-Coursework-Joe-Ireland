@@ -1661,7 +1661,7 @@ MonoBehaviour:
   dynamicTarget_B: {fileID: 421056721}
   playerA: {fileID: 407492556}
   playerB: {fileID: 1434553624}
-  moveSpeed: 0.3
+  moveSpeed: 0.05
 --- !u!81 &963194230
 AudioListener:
   m_ObjectHideFlags: 0
